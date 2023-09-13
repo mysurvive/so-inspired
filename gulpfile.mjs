@@ -15,6 +15,8 @@ import { hideBin } from "yargs/helpers";
 import rollupStream from "@rollup/stream";
 
 import rollupConfig from "./rollup.config.mjs";
+import gulpSass from "gulp-sass";
+import dartSass from "sass";
 
 /********************/
 /*  CONFIGURATION   */
@@ -24,13 +26,10 @@ const packageId = "so-inspired";
 const sourceDirectory = "./src";
 const distDirectory = "./dist";
 const stylesDirectory = `${sourceDirectory}/styles`;
-const stylesExtension = "css";
+const stylesExtension = "scss";
 const sourceFileExtension = "js";
-const staticFiles = [
-  "styles",
-  "module.json",
-  "templates",
-];
+const sass = gulpSass(dartSass);
+const staticFiles = ["module.json", "templates"];
 
 /********************/
 /*      BUILD       */
@@ -59,6 +58,7 @@ function buildCode() {
 function buildStyles() {
   return gulp
     .src(`${stylesDirectory}/${packageId}.${stylesExtension}`)
+    .pipe(sass().on("error", sass.logError))
     .pipe(gulp.dest(`${distDirectory}/styles`));
 }
 
@@ -94,7 +94,10 @@ export function watch() {
   );
 }
 
-export const build = gulp.series(clean, gulp.parallel(buildCode, copyFiles));
+export const build = gulp.series(
+  clean,
+  gulp.parallel(buildCode, buildStyles, copyFiles)
+);
 
 /********************/
 /*      CLEAN       */
