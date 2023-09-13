@@ -3,7 +3,7 @@ Hooks.on("init", () => {
   game.settings.register("so-inspired", "maxInspiration", {
     name: "Maximum Inspiration",
     hint: "The maximum amount of inspiration that can be held by a player at a time.",
-    scope: "World",
+    scope: "world",
     config: true,
     type: Number,
     default: 1,
