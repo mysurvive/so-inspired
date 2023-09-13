@@ -1,0 +1,7 @@
+/.vs/
+/src/.vs/
+/.husky/
+/dist/
+/node_modules/
+/foundryconfig.json
+.vscode
