@@ -50,7 +50,7 @@ function createInspoFlag() {
 function renderNewInspoSheet(_sheet, html) {
   if (_sheet.actor.type === "character") {
     const actorUuid = _sheet.actor.uuid;
-    const actorOwner = game.users.find((u) => u.character.uuid === actorUuid);
+    const actorOwner = game.users.find((u) => u.character?.uuid === actorUuid);
     let currentInspiration;
     if (actorOwner) {
       currentInspiration = actorOwner.getFlag(
@@ -62,19 +62,25 @@ function renderNewInspoSheet(_sheet, html) {
     const inspirationArea = $(html).find(".inspiration");
     inspirationArea.hide();
 
-    const counterArea = $(html).find(".counters");
+    let counterArea;
+    let newInspirationArea;
+    if (_sheet.options.classes.includes("tidy5e")) {
+      counterArea = $(html).find(".tidy5e-header");
+      newInspirationArea = `<div class="counter flexrow new-inspiration" style="width: 200px; height:25px; display:flex; margin: 10px 10px 10px 10px;"><h4>Inspiration</h4><div class="counter-value"><button type="button" class="add-inspiration-btn" style="height:20px;width:20px;line-height:0px;padding-left:2px;"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn" style="height:20px;width:20px;line-height:0px;padding-left:2px;"><i class="fa-solid fa-minus" style="color: #000000;"></i></button><span class="inspiration-span" style="margin-left:10px;">${currentInspiration}</span></div></div>`;
+      counterArea.after(newInspirationArea);
+    } else {
+      counterArea = $(html).find(".counters");
+      newInspirationArea = `<div class="counter flexrow new-inspiration"><h4>Inspiration</h4><div class="counter-value"><button type="button" class="add-inspiration-btn"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn"><i class="fa-solid fa-minus" style="color: #000000;"></i></button><span class="inspiration-span">${currentInspiration}</span></div></div>`;
+      counterArea.append(newInspirationArea);
+    }
 
-    const newInspirationArea = `<div class="counter flexrow new-inspiration"><h4>Inspiration</h4><div class="counter-value"><button type="button" class="add-inspiration-btn"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn"><i class="fa-solid fa-minus" style="color: #000000;"></i></button><span class="inspiration-span">${currentInspiration}</span></div></div>`;
-
-    counterArea.append(newInspirationArea);
-
-    $(counterArea)
+    $(html)
       .find(".add-inspiration-btn")
       .off("click")
       .on("click", function () {
         addInspiration(actorOwner, _sheet);
       });
-    $(counterArea)
+    $(html)
       .find(".remove-inspiration-btn")
       .off("click")
       .on("click", function () {
@@ -84,19 +90,39 @@ function renderNewInspoSheet(_sheet, html) {
 }
 
 function addInspiration(user, _sheet) {
+  if (!user) {
+    ui.notifications.error("Sheet has no owner assigned.");
+    return;
+  }
   const maxInspo = game.settings.get("so-inspired", "maxInspiration");
   const currentInspo = user.getFlag("so-inspired", "inspirationCount");
+
   if (currentInspo < maxInspo) {
     user.setFlag("so-inspired", "inspirationCount", currentInspo + 1);
+    ChatMessage.create({
+      user: user,
+      flavor: _sheet.actor.name + " has gained a point of inspiration!",
+    });
+  } else {
+    ChatMessage.create({
+      user: user,
+      flavor:
+        _sheet.actor.name +
+        " was granted inspiration, but can't have any more. Don't forget to use your inspiration!",
+    });
   }
-
   _sheet.render(true);
 }
+
 function removeInspiration(user, _sheet) {
   const minInspo = 0;
   const currentInspo = user.getFlag("so-inspired", "inspirationCount");
   if (currentInspo > minInspo) {
     user.setFlag("so-inspired", "inspirationCount", currentInspo - 1);
+    ChatMessage.create({
+      user: user,
+      flavor: _sheet.actor.name + " has used a point of inspiration!",
+    });
   }
   _sheet.render(true);
 }
