@@ -15,6 +15,7 @@ Hooks.on("ready", () => {
 });
 
 Hooks.on("renderActorSheet", (_sheet, html) => {
+  console.log(_sheet.options.classes);
   renderNewInspoSheet(_sheet, html);
 });
 
@@ -52,11 +53,13 @@ function renderNewInspoSheet(_sheet, html) {
     const actorUuid = _sheet.actor.uuid;
     const actorOwner = game.users.find((u) => u.character?.uuid === actorUuid);
     let currentInspiration;
+    let maxInspiration;
     if (actorOwner) {
       currentInspiration = actorOwner.getFlag(
         "so-inspired",
         "inspirationCount"
       );
+      maxInspiration = game.settings.get("so-inspired", "maxInspiration");
     }
 
     const inspirationArea = $(html).find(".inspiration");
@@ -64,9 +67,16 @@ function renderNewInspoSheet(_sheet, html) {
 
     let counterArea;
     let newInspirationArea;
+    console.log(maxInspiration);
     if (_sheet.options.classes.includes("tidy5e")) {
       counterArea = $(html).find(".tidy5e-header");
       newInspirationArea = `<div class="counter flexrow new-inspiration" style="width: 200px; height:25px; display:flex; margin: 10px 10px 10px 10px;"><h4>Inspiration</h4><div class="counter-value"><button type="button" class="add-inspiration-btn" style="height:20px;width:20px;line-height:0px;padding-left:2px;"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn" style="height:20px;width:20px;line-height:0px;padding-left:2px;"><i class="fa-solid fa-minus" style="color: #000000;"></i></button><span class="inspiration-span" style="margin-left:10px;">${currentInspiration}</span></div></div>`;
+      counterArea.after(newInspirationArea);
+    } else if (_sheet.options.classes.includes("dnd5e2")) {
+      counterArea = $(html).find(".card .stats").children().last();
+      newInspirationArea = `<div class="meter-group"><div class="label roboto-condensed-upper"><span>Inspiration</span></div><div class="meter hit-dice progress" role="meter" aria-valuemin="0" aria-valuenow="${currentInspiration}" aria-valuemax="${maxInspiration}" style="--bar-percentage: ${
+        (currentInspiration / maxInspiration) * 100
+      }%"><div class="label"><span class="value">${currentInspiration}</span><span class="separator">/</span><span class="max">${maxInspiration}</span></div><div class="inspo-buttons"><button type="button" class="add-inspiration-btn"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn"><i class="fa-solid fa-minus" style="color: #000000;"></i></button></div></div></div>`;
       counterArea.after(newInspirationArea);
     } else {
       counterArea = $(html).find(".counters");
