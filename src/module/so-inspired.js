@@ -24,7 +24,7 @@ Hooks.on("updateUser", (user) => {
   //updatePlayerListInspo();
 });
 
-Hooks.on("tidy5e-sheet.renderActorSheet", (app, element, data) => {
+Hooks.on("tidy5e-sheet.renderActorSheet", (app, element) => {
   if (app.actor.type !== "character") {
     return;
   }
@@ -74,7 +74,7 @@ Hooks.on("tidy5e-sheet.renderActorSheet", (app, element, data) => {
           </span>
         </div>
       </div>`;
-      
+
     html.find(".tidy5e-sheet-header").after(newInspirationArea);
 
     html
