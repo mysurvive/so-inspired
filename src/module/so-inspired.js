@@ -8,6 +8,16 @@ Hooks.on("init", () => {
     type: Number,
     default: 1,
   });
+
+  game.settings.register("so-inspired", "showInspirationOnPlayerList", {
+    name: "Show Inspiration on Player List",
+    hint: "Shows the amount of inspiration for each user on the player list (requires reload).",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true,
+    requiresReload: true,
+  });
 });
 
 Hooks.on("ready", () => {
@@ -15,13 +25,16 @@ Hooks.on("ready", () => {
 });
 
 Hooks.on("renderActorSheet", (_sheet, html) => {
-  console.log(_sheet.options.classes);
   renderNewInspoSheet(_sheet, html);
 });
 
 Hooks.on("updateUser", (user) => {
   updateSheetForInspo(user);
-  //updatePlayerListInspo();
+});
+
+Hooks.on("renderPlayerList", () => {
+  if (game.settings.get("so-inspired", "showInspirationOnPlayerList"))
+    updatePlayerListInspo();
 });
 
 Hooks.on("tidy5e-sheet.renderActorSheet", (app, element) => {
@@ -92,23 +105,23 @@ Hooks.on("tidy5e-sheet.renderActorSheet", (app, element) => {
   }
 });
 
-/*
 async function updatePlayerListInspo() {
   const playerList = $(document)
     .find("aside#players.app")
     .find("ol")
     .find("li");
-  for (const player of $(document)
-    .find("aside#players.app")
-    .find("ol")
-    .find("li")) {
+  for (const player of playerList) {
     const user = await fromUuid(`User.${$(player).attr("data-user-id")}`);
-    const inspoCount = user.getFlag("so-inspired", "inspirationCount");
-    console.log(player);
-    $(player).append(`<span class="inspiration-count">${inspoCount}</span>`);
+    if (!user.isGM) {
+      const inspoCount = user.getFlag("so-inspired", "inspirationCount");
+      $(player)
+        .children()
+        .last()
+        .append(`<span class="inspiration-count">${inspoCount}</span>`);
+    }
   }
 }
-*/
+
 function createInspoFlag() {
   for (const user of game.users) {
     if (!user.getFlag("so-inspired", "inspirationCount")) {
@@ -121,46 +134,46 @@ function renderNewInspoSheet(_sheet, html) {
   if (_sheet.actor.type === "character") {
     const actorUuid = _sheet.actor.uuid;
     const actorOwner = game.users.find((u) => u.character?.uuid === actorUuid);
-    let currentInspiration;
-    let maxInspiration;
     if (actorOwner) {
+      let currentInspiration;
+      let maxInspiration;
       currentInspiration = actorOwner.getFlag(
         "so-inspired",
         "inspirationCount"
       );
       maxInspiration = game.settings.get("so-inspired", "maxInspiration");
+
+      const inspirationArea = $(html).find(".inspiration");
+      inspirationArea.hide();
+
+      let counterArea;
+      let newInspirationArea;
+
+      if (_sheet.options.classes.includes("dnd5e2")) {
+        counterArea = $(html).find(".card .stats").children().last();
+        newInspirationArea = `<div class="meter-group"><div class="label roboto-condensed-upper"><span>Inspiration</span></div><div class="meter hit-dice progress" role="meter" aria-valuemin="0" aria-valuenow="${currentInspiration}" aria-valuemax="${maxInspiration}" style="--bar-percentage: ${
+          (currentInspiration / maxInspiration) * 100
+        }%"><div class="label"><span class="value">${currentInspiration}</span><span class="separator"> / </span><span class="max">${maxInspiration}</span></div><div class="inspo-buttons"><button type="button" class="add-inspiration-btn"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn"><i class="fa-solid fa-minus" style="color: #000000;"></i></button></div></div></div>`;
+        counterArea.after(newInspirationArea);
+      } else {
+        counterArea = $(html).find(".counters");
+        newInspirationArea = `<div class="counter flexrow new-inspiration"><h4>Inspiration</h4><div class="counter-value"><button type="button" class="add-inspiration-btn"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn"><i class="fa-solid fa-minus" style="color: #000000;"></i></button><span class="inspiration-span">${currentInspiration}</span></div></div>`;
+        counterArea.append(newInspirationArea);
+      }
+
+      $(html)
+        .find(".add-inspiration-btn")
+        .off("click")
+        .on("click", function () {
+          addInspiration(actorOwner, _sheet);
+        });
+      $(html)
+        .find(".remove-inspiration-btn")
+        .off("click")
+        .on("click", function () {
+          removeInspiration(actorOwner, _sheet);
+        });
     }
-
-    const inspirationArea = $(html).find(".inspiration");
-    inspirationArea.hide();
-
-    let counterArea;
-    let newInspirationArea;
-    console.log(maxInspiration);
-    if (_sheet.options.classes.includes("dnd5e2")) {
-      counterArea = $(html).find(".card .stats").children().last();
-      newInspirationArea = `<div class="meter-group"><div class="label roboto-condensed-upper"><span>Inspiration</span></div><div class="meter hit-dice progress" role="meter" aria-valuemin="0" aria-valuenow="${currentInspiration}" aria-valuemax="${maxInspiration}" style="--bar-percentage: ${
-        (currentInspiration / maxInspiration) * 100
-      }%"><div class="label"><span class="value">${currentInspiration}</span><span class="separator"> / </span><span class="max">${maxInspiration}</span></div><div class="inspo-buttons"><button type="button" class="add-inspiration-btn"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn"><i class="fa-solid fa-minus" style="color: #000000;"></i></button></div></div></div>`;
-      counterArea.after(newInspirationArea);
-    } else {
-      counterArea = $(html).find(".counters");
-      newInspirationArea = `<div class="counter flexrow new-inspiration"><h4>Inspiration</h4><div class="counter-value"><button type="button" class="add-inspiration-btn"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn"><i class="fa-solid fa-minus" style="color: #000000;"></i></button><span class="inspiration-span">${currentInspiration}</span></div></div>`;
-      counterArea.append(newInspirationArea);
-    }
-
-    $(html)
-      .find(".add-inspiration-btn")
-      .off("click")
-      .on("click", function () {
-        addInspiration(actorOwner, _sheet);
-      });
-    $(html)
-      .find(".remove-inspiration-btn")
-      .off("click")
-      .on("click", function () {
-        removeInspiration(actorOwner, _sheet);
-      });
   }
 }
 
@@ -190,6 +203,10 @@ function addInspiration(user, _sheet) {
 }
 
 function removeInspiration(user, _sheet) {
+  if (!user) {
+    ui.notifications.error("Sheet has no owner assigned.");
+    return;
+  }
   const minInspo = 0;
   const currentInspo = user.getFlag("so-inspired", "inspirationCount");
   if (currentInspo > minInspo) {
