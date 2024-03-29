@@ -23,6 +23,75 @@ Hooks.on("updateUser", (user) => {
   updateSheetForInspo(user);
   //updatePlayerListInspo();
 });
+
+Hooks.on("tidy5e-sheet.renderActorSheet", (app, element, data) => {
+  if (app.actor.type !== "character") {
+    return;
+  }
+
+  const html = $(element);
+
+  const inspirationArea = html.find(".inspiration");
+  inspirationArea.hide();
+
+  let currentInspiration;
+  const actorOwner = game.users.find(
+    (u) => u.character?.uuid === app.actor.uuid
+  );
+  if (actorOwner) {
+    currentInspiration = actorOwner.getFlag("so-inspired", "inspirationCount");
+
+    let newInspirationArea = `
+      <div
+        data-tidy-render-scheme="handlebars"
+        class="counter flexrow new-inspiration"
+        style="width: 200px; height: 25px; display: flex; margin: 10px 10px 10px 10px"
+      >
+        <h4>Inspiration</h4>
+        <div class="counter-value">
+          <button
+            type="button"
+            class="add-inspiration-btn"
+            style="height: 20px; width: 20px; line-height: 0px; padding-left: 2px"
+          >
+            <i
+              class="fa-solid fa-plus"
+              style="color: var(--t5e-primary-font-color)"
+            ></i>
+          </button>
+          <button
+            type="button"
+            class="remove-inspiration-btn"
+            style="height: 20px; width: 20px; line-height: 0px; padding-left: 2px"
+          >
+            <i
+              class="fa-solid fa-minus"
+              style="color: var(--t5e-primary-font-color)"
+            ></i>
+          </button>
+          <span class="inspiration-span" style="margin-left: 10px">
+            ${currentInspiration}
+          </span>
+        </div>
+      </div>`;
+      
+    html.find(".tidy5e-sheet-header").after(newInspirationArea);
+
+    html
+      .find(".add-inspiration-btn")
+      .off("click")
+      .on("click", function () {
+        addInspiration(actorOwner, app);
+      });
+    html
+      .find(".remove-inspiration-btn")
+      .off("click")
+      .on("click", function () {
+        removeInspiration(actorOwner, app);
+      });
+  }
+});
+
 /*
 async function updatePlayerListInspo() {
   const playerList = $(document)
@@ -68,11 +137,7 @@ function renderNewInspoSheet(_sheet, html) {
     let counterArea;
     let newInspirationArea;
     console.log(maxInspiration);
-    if (_sheet.options.classes.includes("tidy5e")) {
-      counterArea = $(html).find(".tidy5e-header");
-      newInspirationArea = `<div class="counter flexrow new-inspiration" style="width: 200px; height:25px; display:flex; margin: 10px 10px 10px 10px;"><h4>Inspiration</h4><div class="counter-value"><button type="button" class="add-inspiration-btn" style="height:20px;width:20px;line-height:0px;padding-left:2px;"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn" style="height:20px;width:20px;line-height:0px;padding-left:2px;"><i class="fa-solid fa-minus" style="color: #000000;"></i></button><span class="inspiration-span" style="margin-left:10px;">${currentInspiration}</span></div></div>`;
-      counterArea.after(newInspirationArea);
-    } else if (_sheet.options.classes.includes("dnd5e2")) {
+    if (_sheet.options.classes.includes("dnd5e2")) {
       counterArea = $(html).find(".card .stats").children().last();
       newInspirationArea = `<div class="meter-group"><div class="label roboto-condensed-upper"><span>Inspiration</span></div><div class="meter hit-dice progress" role="meter" aria-valuemin="0" aria-valuenow="${currentInspiration}" aria-valuemax="${maxInspiration}" style="--bar-percentage: ${
         (currentInspiration / maxInspiration) * 100
@@ -139,6 +204,6 @@ function removeInspiration(user, _sheet) {
 
 function updateSheetForInspo(user) {
   if (user?.character.sheet.rendered) {
-    user.character.sheet.render(true);
+    user.character.sheet.render(false);
   }
 }
