@@ -85,7 +85,6 @@ class ColorPickerSubmenu extends FormApplication {
 
   static get defaultOptions() {
     return mergeObject(super.defaultOptions, {
-      classes: ["form"],
       popOut: true,
       template: "modules/so-inspired/templates/colorPicker.hbs",
       classes: ["form", "so-inspired", "color-picker"],
