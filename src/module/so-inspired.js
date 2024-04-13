@@ -1,5 +1,7 @@
 Hooks.on("renderChatMessage", () => {});
 Hooks.on("init", () => {
+  loadTemplates(["modules/so-inspired/templates/colorPicker.hbs"]);
+
   game.settings.register("so-inspired", "maxInspiration", {
     name: "Maximum Inspiration",
     hint: "The maximum amount of inspiration that can be held by a player at a time.",
@@ -18,10 +20,163 @@ Hooks.on("init", () => {
     default: true,
     requiresReload: true,
   });
+
+  game.settings.register("so-inspired", "inspirationBackgroundColor", {
+    scope: "client",
+    config: false,
+    type: Object,
+    default: { colorpicker1: "#401f25", colorpicker2: "#741b2b" },
+  });
+
+  game.settings.registerMenu("so-inspired", "colorPickerMenu", {
+    name: "Color Picker",
+    label: "Open color menu",
+    hint: "Changes the color of the inspiration bar on the DND5e2 character sheet.",
+    type: ColorPickerSubmenu,
+    restricted: false,
+  });
 });
+
+class ColorPickerSubmenu extends FormApplication {
+  constructor() {
+    super();
+    addEventListener("change", this.updatePicker, false);
+  }
+
+  updatePicker(event) {
+    const soInspiredStyleSheet = Object.values(document.styleSheets).find((s) =>
+      s.href.split("/").find((i) => i.includes("so-inspired.css"))
+    );
+    const color1 = document.querySelector("input#colorpicker1").value;
+    const color2 = document.querySelector("input#colorpicker2").value;
+
+    if (
+      soInspiredStyleSheet.cssRules[0].selectorText ===
+      ".meter.hit-dice.progress.preview::before"
+    )
+      soInspiredStyleSheet.deleteRule(0);
+
+    if (event.target.id == "colorpicker1") {
+      soInspiredStyleSheet.insertRule(
+        `.meter.hit-dice.progress.preview::before {
+          background: 
+            linear-gradient(
+            to right,
+            ${event.target.value} 0%,
+            ${color2} 100%
+          ) !important;
+          border-right: none !important;`,
+        0
+      );
+    } else if (event.target.id == "colorpicker2") {
+      soInspiredStyleSheet.insertRule(
+        `.meter.hit-dice.progress.preview::before {
+          background: 
+            linear-gradient(
+            to right,
+            ${color1} 0%,
+            ${event.target.value} 100%
+          ) !important;
+          border-right: none !important;`,
+        0
+      );
+    }
+  }
+
+  static get defaultOptions() {
+    return mergeObject(super.defaultOptions, {
+      popOut: true,
+      template: "modules/so-inspired/templates/colorPicker.hbs",
+      classes: ["form", "so-inspired", "color-picker"],
+      id: "so-inspired-color-picker",
+      title: "Inspiration Color Picker",
+    });
+  }
+
+  getData() {
+    return game.settings.get("so-inspired", "inspirationBackgroundColor");
+  }
+
+  _updateObject(event, formData) {
+    const data = expandObject(formData);
+    game.settings.set("so-inspired", "inspirationBackgroundColor", data);
+    Hooks.callAll("changeInspirationColor");
+  }
+}
 
 Hooks.on("ready", () => {
   createInspoFlag();
+
+  const soInspiredStyleSheet = Object.values(document.styleSheets).find((s) =>
+    s.href.split("/").find((i) => i.includes("so-inspired.css"))
+  );
+  const color1 = game.settings.get(
+    "so-inspired",
+    "inspirationBackgroundColor"
+  ).colorpicker1;
+  const color2 = game.settings.get(
+    "so-inspired",
+    "inspirationBackgroundColor"
+  ).colorpicker2;
+
+  soInspiredStyleSheet.insertRule(
+    `.meter.hit-dice.progress.preview::before {
+          background: 
+            linear-gradient(
+            to right,
+            ${color1} 0%,
+            ${color2} 100%
+          ) !important;
+          border-right: none !important;`,
+    0
+  );
+  soInspiredStyleSheet.insertRule(
+    `.meter.hit-dice.progress.inspiration::before {
+          background: 
+            linear-gradient(
+            to right,
+            ${color1} 0%,
+            ${color2} 100%
+          ) !important;
+          border-right: none !important;`,
+    1
+  );
+});
+
+Hooks.on("changeInspirationColor", () => {
+  const soInspiredStyleSheet = Object.values(document.styleSheets).find((s) =>
+    s.href.split("/").find((i) => i.includes("so-inspired.css"))
+  );
+
+  for (const key of Object.keys(soInspiredStyleSheet.cssRules)) {
+    if (
+      soInspiredStyleSheet.cssRules[key]?.selectorText ===
+      ".meter.hit-dice.progress.inspiration::before"
+    ) {
+      soInspiredStyleSheet.deleteRule(key);
+    }
+  }
+
+  const color1 = game.settings.get(
+    "so-inspired",
+    "inspirationBackgroundColor"
+  ).colorpicker1;
+  const color2 = game.settings.get(
+    "so-inspired",
+    "inspirationBackgroundColor"
+  ).colorpicker2;
+
+  soInspiredStyleSheet.insertRule(
+    `.meter.hit-dice.progress.inspiration::before {
+          background: 
+            linear-gradient(
+            to right,
+            ${color1} 0%,
+            ${color2} 100%
+          ) !important;
+          border-right: none !important;`,
+    1
+  );
 });
 
 Hooks.on("renderActorSheet", (_sheet, html) => {
@@ -151,7 +306,7 @@ function renderNewInspoSheet(_sheet, html) {
 
       if (_sheet.options.classes.includes("dnd5e2")) {
         counterArea = $(html).find(".card .stats").children().last();
-        newInspirationArea = `<div class="meter-group"><div class="label roboto-condensed-upper"><span>Inspiration</span></div><div class="meter hit-dice progress" role="meter" aria-valuemin="0" aria-valuenow="${currentInspiration}" aria-valuemax="${maxInspiration}" style="--bar-percentage: ${
+        newInspirationArea = `<div class="meter-group"><div class="label roboto-condensed-upper"><span>Inspiration</span></div><div class="meter hit-dice progress inspiration" role="meter" aria-valuemin="0" aria-valuenow="${currentInspiration}" aria-valuemax="${maxInspiration}" style="--bar-percentage: ${
           (currentInspiration / maxInspiration) * 100
         }%"><div class="label"><span class="value">${currentInspiration}</span><span class="separator"> / </span><span class="max">${maxInspiration}</span></div><div class="inspo-buttons"><button type="button" class="add-inspiration-btn"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn"><i class="fa-solid fa-minus" style="color: #000000;"></i></button></div></div></div>`;
         counterArea.after(newInspirationArea);

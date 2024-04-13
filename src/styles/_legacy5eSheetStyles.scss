@@ -1,0 +1,19 @@
+.dnd5e.sheet.actor {
+  .new-inspiration {
+    button {
+      line-height: 10px;
+      text-align: center;
+      padding-left: 2px;
+      margin: 0px 6px 0px 0px;
+      height: 20px;
+      width: 20px;
+    }
+    .inspiration-span {
+      height: 20px;
+      width: 20px;
+      margin: 0;
+      padding-right: 7px;
+      text-align: center;
+    }
+  }
+}

@@ -1,0 +1,72 @@
+<form autocomplete="off" onsubmit="event.preventDefault();">
+  <fieldset class="preview-fieldset">
+    <legend>
+      Preview
+    </legend>
+    <div class="dnd5e2 sheet actor character color-tester">
+      <div class="sheet-body">
+        <div class="sidebar">
+          <div class="card">
+            <div class="meter-group">
+              <div class="label roboto-condensed-upper">
+                <span>Inspiration</span>
+              </div>
+              <div
+                class="meter hit-dice progress preview"
+                role="meter"
+                aria-valuemin="0"
+                aria-valuenow="2"
+                aria-valuemax="3"
+                style="--bar-percentage: 66.66666666666666%"
+              >
+                <div class="label">
+                  <span class="value">2</span>
+                  <span class="separator">
+                    /
+                  </span>
+                  <span class="max">3</span>
+                </div>
+                <div class="inspo-buttons">
+                  <button type="button" class="add-inspiration-btn">
+                    <i class="fa-solid fa-plus" style="color: #000000;"></i>
+                  </button>
+                  <button type="button" class="remove-inspiration-btn">
+                    <i class="fa-solid fa-minus" style="color: #000000;"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </fieldset>
+  <fieldset class="options-fieldset">
+    <legend>
+      Options
+    </legend>
+    <div class="color-picker-options">
+      <label for="colorpicker1">Color 1:</label>
+      <input
+        type="color"
+        id="colorpicker1"
+        name="colorpicker1"
+        value="{{colorpicker1}}"
+      />
+      <label for="colorpicker2">Color 2:</label>
+      <input
+        type="color"
+        id="colorpicker2"
+        name="colorpicker2"
+        value="{{colorpicker2}}"
+      />
+    </div>
+  </fieldset>
+  <footer class="sheet-footer buttons">
+    <button type="submit" name="submit">
+      <i class="far fa-save"></i>
+      Save
+    </button>
+  </footer>
+</form>
