@@ -10,9 +10,8 @@
     }
   ],
   "compatibility": {
-    "minimum": "11",
-    "verified": "11.315",
-    "meximum": "11"
+    "minimum": "12",
+    "verified": "12.327"
   },
   "relationships": {
     "systems": [
