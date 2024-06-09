@@ -1,6 +1,9 @@
 Hooks.on("renderChatMessage", () => {});
 Hooks.on("init", () => {
-  loadTemplates(["modules/so-inspired/templates/colorPicker.hbs"]);
+  loadTemplates([
+    "modules/so-inspired/templates/colorPicker.hbs",
+    "modules/so-inspired/templates/inspirationHandler.hbs",
+  ]);
 
   game.settings.register("so-inspired", "maxInspiration", {
     name: "Maximum Inspiration",
@@ -34,6 +37,19 @@ Hooks.on("init", () => {
     hint: "Changes the color of the inspiration bar on the DND5e2 character sheet.",
     type: ColorPickerSubmenu,
     restricted: false,
+  });
+
+  game.keybindings.register("so-inspired", "inspirationHandler", {
+    name: "Inspiration Handler",
+    hint: "Opens the Inspiration handler dialog",
+    restricted: true,
+    editable: [{ key: "KeyI" }],
+    onDown: () => {
+      if (game.user.isGM) {
+        inspirationHandler();
+      }
+      return true;
+    },
   });
 });
 
@@ -344,17 +360,19 @@ function addInspiration(user, _sheet) {
     user.setFlag("so-inspired", "inspirationCount", currentInspo + 1);
     ChatMessage.create({
       user: user,
-      flavor: _sheet.actor.name + " has gained a point of inspiration!",
+      flavor:
+        (_sheet ? _sheet.actor.name : user.name) +
+        " has gained a point of inspiration!",
     });
   } else {
     ChatMessage.create({
       user: user,
       flavor:
-        _sheet.actor.name +
+        (_sheet ? _sheet.actor.name : user.name) +
         " was granted inspiration, but can't have any more. Don't forget to use your inspiration!",
     });
   }
-  _sheet.render(true);
+  if (_sheet) _sheet.render(true);
 }
 
 function removeInspiration(user, _sheet) {
@@ -378,4 +396,40 @@ function updateSheetForInspo(user) {
   if (user?.character.sheet.rendered) {
     user.character.sheet.render(false);
   }
+}
+
+async function inspirationHandler() {
+  const users = {
+    users: game.users
+      .map((u) => {
+        if (!u.isGM) return { name: u.name, id: u.id };
+      })
+      .filter((u) => u != undefined),
+  };
+
+  new Dialog({
+    title: "Inspiration Handler",
+    content: await renderTemplate(
+      "modules/so-inspired/templates/inspirationHandler.hbs",
+      users
+    ),
+    buttons: {
+      confirm: {
+        label: "Confirm",
+        callback: (html) => {
+          inspirationHandlerResponse(html);
+        },
+      },
+      cancel: {
+        label: "Cancel",
+        callback: () => {},
+      },
+    },
+  }).render(true);
+}
+
+function inspirationHandlerResponse(html) {
+  const userId = html.find('input[name="user"]:checked').attr("id");
+  const user = game.users.get(userId);
+  addInspiration(user);
 }
