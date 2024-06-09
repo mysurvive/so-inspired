@@ -31,6 +31,15 @@ Hooks.on("init", () => {
     default: { colorpicker1: "#401f25", colorpicker2: "#741b2b" },
   });
 
+  game.settings.register("so-inspired", "inspirationName", {
+    name: "Inspiration Name",
+    hint: 'Set the global name for "Inspiration"',
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Inspiration",
+  });
+
   game.settings.registerMenu("so-inspired", "colorPickerMenu", {
     name: "Color Picker",
     label: "Open color menu",
@@ -231,7 +240,7 @@ Hooks.on("tidy5e-sheet.renderActorSheet", (app, element) => {
         class="counter flexrow new-inspiration"
         style="width: 200px; height: 25px; display: flex; margin: 10px 10px 10px 10px"
       >
-        <h4>Inspiration</h4>
+        <h4>${game.settings.get("so-inspired", "inspirationName")}</h4>
         <div class="counter-value">
           <button
             type="button"
@@ -322,13 +331,19 @@ function renderNewInspoSheet(_sheet, html) {
 
       if (_sheet.options.classes.includes("dnd5e2")) {
         counterArea = $(html).find(".card .stats").children().last();
-        newInspirationArea = `<div class="meter-group"><div class="label roboto-condensed-upper"><span>Inspiration</span></div><div class="meter hit-dice progress inspiration" role="meter" aria-valuemin="0" aria-valuenow="${currentInspiration}" aria-valuemax="${maxInspiration}" style="--bar-percentage: ${
+        newInspirationArea = `<div class="meter-group"><div class="label roboto-condensed-upper"><span>${game.settings.get(
+          "so-inspired",
+          "inspirationName"
+        )}</span></div><div class="meter hit-dice progress inspiration" role="meter" aria-valuemin="0" aria-valuenow="${currentInspiration}" aria-valuemax="${maxInspiration}" style="--bar-percentage: ${
           (currentInspiration / maxInspiration) * 100
         }%"><div class="label"><span class="value">${currentInspiration}</span><span class="separator"> / </span><span class="max">${maxInspiration}</span></div><div class="inspo-buttons"><button type="button" class="add-inspiration-btn"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn"><i class="fa-solid fa-minus" style="color: #000000;"></i></button></div></div></div>`;
         counterArea.after(newInspirationArea);
       } else {
         counterArea = $(html).find(".counters");
-        newInspirationArea = `<div class="counter flexrow new-inspiration"><h4>Inspiration</h4><div class="counter-value"><button type="button" class="add-inspiration-btn"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn"><i class="fa-solid fa-minus" style="color: #000000;"></i></button><span class="inspiration-span">${currentInspiration}</span></div></div>`;
+        newInspirationArea = `<div class="counter flexrow new-inspiration"><h4>${game.settings.get(
+          "so-inspired",
+          "inspirationName"
+        )}</h4><div class="counter-value"><button type="button" class="add-inspiration-btn"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn"><i class="fa-solid fa-minus" style="color: #000000;"></i></button><span class="inspiration-span">${currentInspiration}</span></div></div>`;
         counterArea.append(newInspirationArea);
       }
 
@@ -362,14 +377,20 @@ function addInspiration(user, _sheet) {
       user: user,
       flavor:
         (_sheet ? _sheet.actor.name : user.name) +
-        " has gained a point of inspiration!",
+        ` has gained ${game.settings.get("so-inspired", "inspirationName")}!`,
     });
   } else {
     ChatMessage.create({
       user: user,
       flavor:
         (_sheet ? _sheet.actor.name : user.name) +
-        " was granted inspiration, but can't have any more. Don't forget to use your inspiration!",
+        ` was granted ${game.settings.get(
+          "so-inspired",
+          "inspirationName"
+        )}, but can't have any more. Don't forget to use your ${game.settings.get(
+          "so-inspired",
+          "inspirationName"
+        )}!`,
     });
   }
   if (_sheet) _sheet.render(true);
@@ -386,7 +407,9 @@ function removeInspiration(user, _sheet) {
     user.setFlag("so-inspired", "inspirationCount", currentInspo - 1);
     ChatMessage.create({
       user: user,
-      flavor: _sheet.actor.name + " has used a point of inspiration!",
+      flavor:
+        _sheet.actor.name +
+        ` has used ${game.settings.get("so-inspired", "inspirationName")}!`,
     });
   }
   _sheet.render(true);
@@ -399,19 +422,20 @@ function updateSheetForInspo(user) {
 }
 
 async function inspirationHandler() {
-  const users = {
+  const options = {
     users: game.users
       .map((u) => {
         if (!u.isGM) return { name: u.name, id: u.id };
       })
       .filter((u) => u != undefined),
+    inspirationLabel: game.settings.get("so-inspired", "inspirationName"),
   };
 
   new Dialog({
     title: "Inspiration Handler",
     content: await renderTemplate(
       "modules/so-inspired/templates/inspirationHandler.hbs",
-      users
+      options
     ),
     buttons: {
       confirm: {
@@ -430,6 +454,14 @@ async function inspirationHandler() {
 
 function inspirationHandlerResponse(html) {
   const userId = html.find('input[name="user"]:checked').attr("id");
-  const user = game.users.get(userId);
-  addInspiration(user);
+  if (userId === "all") {
+    for (const user of game.users) {
+      if (!user.isGM) {
+        addInspiration(user);
+      }
+    }
+  } else {
+    const user = game.users.get(userId);
+    addInspiration(user);
+  }
 }
