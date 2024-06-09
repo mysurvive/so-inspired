@@ -1,0 +1,13 @@
+<div class="form-group">
+  <div class="instructions">
+    Select a player to give an inspiration point to:
+  </div>
+  {{#each users}}
+    <div class="user-area">
+      <label for="user-{{id}}">
+        <input type="radio" name="user" id="{{id}}" />
+        {{name}}
+      </label>
+    </div>
+  {{/each}}
+</div>
