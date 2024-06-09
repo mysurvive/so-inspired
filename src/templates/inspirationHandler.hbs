@@ -1,6 +1,8 @@
 <div class="form-group">
   <div class="instructions">
-    Select a player to give an inspiration point to:
+    Select a player to give
+    {{inspirationLabel}}
+    to:
   </div>
   {{#each users}}
     <div class="user-area">
@@ -10,4 +12,10 @@
       </label>
     </div>
   {{/each}}
+  <div class="user-area">
+    <label for="all">
+      <input type="radio" name="user" id="all" />
+      All players
+    </label>
+  </div>
 </div>
