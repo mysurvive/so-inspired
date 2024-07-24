@@ -1,4 +1,8 @@
-import { updatePlayerList } from "./socket";
+import {
+  addSharedInspiration,
+  removeSharedInspiration,
+  updatePlayerList,
+} from "./socket";
 
 Hooks.on("renderChatMessage", () => {});
 Hooks.on("init", () => {
@@ -31,6 +35,22 @@ Hooks.on("init", () => {
     config: false,
     type: Object,
     default: { colorpicker1: "#401f25", colorpicker2: "#741b2b" },
+  });
+
+  game.settings.register("so-inspired", "useSharedInspiration", {
+    name: "Use Shared Inspiration",
+    hint: "Changes from the default per-user inspiration count to a shared pool of inspiration that any player can use.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
+  });
+
+  game.settings.register("so-inspired", "sharedInspiration", {
+    scope: "world",
+    config: false,
+    type: Number,
+    default: 0,
   });
 
   game.settings.register("so-inspired", "inspirationName", {
@@ -234,7 +254,12 @@ Hooks.on("tidy5e-sheet.renderActorSheet", (app, element) => {
     (u) => u.character?.uuid === app.actor.uuid
   );
   if (actorOwner) {
-    currentInspiration = actorOwner.getFlag("so-inspired", "inspirationCount");
+    currentInspiration = game.settings.get(
+      "so-inspired",
+      "useSharedInspiration"
+    )
+      ? game.settings.get("so-inspired", "sharedInspiration")
+      : actorOwner.getFlag("so-inspired", "inspirationCount");
 
     let newInspirationArea = `
       <div
@@ -295,14 +320,18 @@ async function updatePlayerListInspo() {
   for (const player of playerList) {
     const user = await fromUuid(`User.${$(player).attr("data-user-id")}`);
     if (!user.isGM) {
-      const inspoCount = user.getFlag("so-inspired", "inspirationCount");
+      const inspoCount = game.settings.get(
+        "so-inspired",
+        "useSharedInspiration"
+      )
+        ? game.settings.get("so-inspired", "sharedInspiration")
+        : actorOwner.getFlag("so-inspired", "inspirationCount");
       $(player)
         .children()
         .last()
         .append(`<span class="inspiration-count">${inspoCount}</span>`);
     }
   }
-  updatePlayerList();
 }
 
 function createInspoFlag() {
@@ -320,10 +349,12 @@ function renderNewInspoSheet(_sheet, html) {
     if (actorOwner) {
       let currentInspiration;
       let maxInspiration;
-      currentInspiration = actorOwner.getFlag(
+      currentInspiration = game.settings.get(
         "so-inspired",
-        "inspirationCount"
-      );
+        "useSharedInspiration"
+      )
+        ? game.settings.get("so-inspired", "sharedInspiration")
+        : actorOwner.getFlag("so-inspired", "inspirationCount");
       maxInspiration = game.settings.get("so-inspired", "maxInspiration");
 
       const inspirationArea = $(html).find(".inspiration");
@@ -374,21 +405,33 @@ async function addInspiration(user, _sheet) {
     return;
   }
   const maxInspo = game.settings.get("so-inspired", "maxInspiration");
-  const currentInspo = user.getFlag("so-inspired", "inspirationCount");
+  const currentInspo = game.settings.get("so-inspired", "useSharedInspiration")
+    ? game.settings.get("so-inspired", "sharedInspiration")
+    : actorOwner.getFlag("so-inspired", "inspirationCount");
 
   if (currentInspo < maxInspo) {
-    await user.setFlag("so-inspired", "inspirationCount", currentInspo + 1);
+    game.settings.get("so-inspired", "useSharedInspiration")
+      ? await addSharedInspiration()
+      : await user.setFlag("so-inspired", "inspirationCount", currentInspo + 1);
     ChatMessage.create({
       user: user,
       flavor:
-        (_sheet ? _sheet.actor.name : user.name) +
+        (game.settings.get("so-inspired", "useSharedInspiration")
+          ? "The group "
+          : _sheet
+          ? _sheet.actor.name
+          : user.name) +
         ` has gained ${game.settings.get("so-inspired", "inspirationName")}!`,
     });
   } else {
     ChatMessage.create({
       user: user,
       flavor:
-        (_sheet ? _sheet.actor.name : user.name) +
+        (game.settings.get("so-inspired", "useSharedInspiration")
+          ? "The group "
+          : _sheet
+          ? _sheet.actor.name
+          : user.name) +
         ` was granted ${game.settings.get(
           "so-inspired",
           "inspirationName"
@@ -399,6 +442,7 @@ async function addInspiration(user, _sheet) {
     });
   }
   if (_sheet) _sheet.render(true);
+  updatePlayerList();
 }
 
 async function removeInspiration(user, _sheet) {
@@ -407,17 +451,24 @@ async function removeInspiration(user, _sheet) {
     return;
   }
   const minInspo = 0;
-  const currentInspo = user.getFlag("so-inspired", "inspirationCount");
+  const currentInspo = game.settings.get("so-inspired", "useSharedInspiration")
+    ? game.settings.get("so-inspired", "sharedInspiration")
+    : actorOwner.getFlag("so-inspired", "inspirationCount");
   if (currentInspo > minInspo) {
-    await user.setFlag("so-inspired", "inspirationCount", currentInspo - 1);
+    game.settings.get("so-inspired", "useSharedInspiration")
+      ? await removeSharedInspiration()
+      : await user.setFlag("so-inspired", "inspirationCount", currentInspo - 1);
     ChatMessage.create({
       user: user,
       flavor:
-        _sheet.actor.name +
+        (game.settings.get("so-inspired", "useSharedInspiration")
+          ? "The group "
+          : _sheet.actor.name) +
         ` has used ${game.settings.get("so-inspired", "inspirationName")}!`,
     });
   }
   _sheet.render(true);
+  updatePlayerList();
 }
 
 function updateSheetForInspo(user) {
