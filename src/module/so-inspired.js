@@ -325,7 +325,7 @@ async function updatePlayerListInspo() {
         "useSharedInspiration"
       )
         ? game.settings.get("so-inspired", "sharedInspiration")
-        : actorOwner.getFlag("so-inspired", "inspirationCount");
+        : user.getFlag("so-inspired", "inspirationCount");
       $(player)
         .children()
         .last()
@@ -407,7 +407,7 @@ async function addInspiration(user, _sheet) {
   const maxInspo = game.settings.get("so-inspired", "maxInspiration");
   const currentInspo = game.settings.get("so-inspired", "useSharedInspiration")
     ? game.settings.get("so-inspired", "sharedInspiration")
-    : actorOwner.getFlag("so-inspired", "inspirationCount");
+    : user.getFlag("so-inspired", "inspirationCount");
 
   if (currentInspo < maxInspo) {
     game.settings.get("so-inspired", "useSharedInspiration")
@@ -453,7 +453,7 @@ async function removeInspiration(user, _sheet) {
   const minInspo = 0;
   const currentInspo = game.settings.get("so-inspired", "useSharedInspiration")
     ? game.settings.get("so-inspired", "sharedInspiration")
-    : actorOwner.getFlag("so-inspired", "inspirationCount");
+    : user.getFlag("so-inspired", "inspirationCount");
   if (currentInspo > minInspo) {
     game.settings.get("so-inspired", "useSharedInspiration")
       ? await removeSharedInspiration()
