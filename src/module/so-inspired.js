@@ -215,6 +215,7 @@ Hooks.on("updateUser", (user) => {
 });
 
 Hooks.on("renderPlayerList", () => {
+  console.log("rendered");
   if (game.settings.get("so-inspired", "showInspirationOnPlayerList"))
     updatePlayerListInspo();
 });
@@ -302,7 +303,6 @@ async function updatePlayerListInspo() {
         .append(`<span class="inspiration-count">${inspoCount}</span>`);
     }
   }
-  updatePlayerList();
 }
 
 function createInspoFlag() {
@@ -399,6 +399,7 @@ async function addInspiration(user, _sheet) {
     });
   }
   if (_sheet) _sheet.render(true);
+  updatePlayerList();
 }
 
 async function removeInspiration(user, _sheet) {
@@ -418,6 +419,7 @@ async function removeInspiration(user, _sheet) {
     });
   }
   _sheet.render(true);
+  updatePlayerList();
 }
 
 function updateSheetForInspo(user) {
