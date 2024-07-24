@@ -1,3 +1,5 @@
+import { updatePlayerList } from "./socket";
+
 Hooks.on("renderChatMessage", () => {});
 Hooks.on("init", () => {
   loadTemplates([
@@ -300,6 +302,7 @@ async function updatePlayerListInspo() {
         .append(`<span class="inspiration-count">${inspoCount}</span>`);
     }
   }
+  updatePlayerList();
 }
 
 function createInspoFlag() {
@@ -350,20 +353,22 @@ function renderNewInspoSheet(_sheet, html) {
       $(html)
         .find(".add-inspiration-btn")
         .off("click")
-        .on("click", function () {
-          addInspiration(actorOwner, _sheet);
+        .on("click", async function () {
+          await addInspiration(actorOwner, _sheet);
+          ui.players.render();
         });
       $(html)
         .find(".remove-inspiration-btn")
         .off("click")
-        .on("click", function () {
-          removeInspiration(actorOwner, _sheet);
+        .on("click", async function () {
+          await removeInspiration(actorOwner, _sheet);
+          ui.players.render();
         });
     }
   }
 }
 
-function addInspiration(user, _sheet) {
+async function addInspiration(user, _sheet) {
   if (!user) {
     ui.notifications.error("Sheet has no owner assigned.");
     return;
@@ -372,7 +377,7 @@ function addInspiration(user, _sheet) {
   const currentInspo = user.getFlag("so-inspired", "inspirationCount");
 
   if (currentInspo < maxInspo) {
-    user.setFlag("so-inspired", "inspirationCount", currentInspo + 1);
+    await user.setFlag("so-inspired", "inspirationCount", currentInspo + 1);
     ChatMessage.create({
       user: user,
       flavor:
@@ -396,7 +401,7 @@ function addInspiration(user, _sheet) {
   if (_sheet) _sheet.render(true);
 }
 
-function removeInspiration(user, _sheet) {
+async function removeInspiration(user, _sheet) {
   if (!user) {
     ui.notifications.error("Sheet has no owner assigned.");
     return;
@@ -404,7 +409,7 @@ function removeInspiration(user, _sheet) {
   const minInspo = 0;
   const currentInspo = user.getFlag("so-inspired", "inspirationCount");
   if (currentInspo > minInspo) {
-    user.setFlag("so-inspired", "inspirationCount", currentInspo - 1);
+    await user.setFlag("so-inspired", "inspirationCount", currentInspo - 1);
     ChatMessage.create({
       user: user,
       flavor:
