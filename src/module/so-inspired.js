@@ -5,8 +5,6 @@ import {
 } from "./socket";
 
 Hooks.on("init", () => {
-  //debug
-  //CONFIG.debug.hooks = true;
   loadTemplates([
     "modules/so-inspired/templates/colorPicker.hbs",
     "modules/so-inspired/templates/inspirationHandler.hbs",
