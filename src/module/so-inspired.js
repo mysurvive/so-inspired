@@ -154,9 +154,12 @@ class ColorPickerSubmenu extends FormApplication {
 Hooks.on("ready", () => {
   createInspoFlag();
 
-  const soInspiredStyleSheet = Object.values(document.styleSheets).find((s) =>
-    s.href.split("/").find((i) => i.includes("so-inspired.css"))
+  /*const soInspiredStyleSheet = Object.values(document.styleSheets).find((s) =>
+    Object.values(s.cssRules).find(
+      (c) => c.href === "modules/so-inspired/styles/so-inspired.css"
+    )
   );
+  console.log(soInspiredStyleSheet);
   const color1 = game.settings.get(
     "so-inspired",
     "inspirationBackgroundColor"
@@ -187,7 +190,7 @@ Hooks.on("ready", () => {
           ) !important;
           border-right: none !important;`,
     1
-  );
+  );*/
 });
 
 Hooks.on("changeInspirationColor", () => {
@@ -226,7 +229,7 @@ Hooks.on("changeInspirationColor", () => {
   );
 });
 
-Hooks.on("renderActorSheet", (_sheet, html) => {
+Hooks.on("renderActorSheetV2", (_sheet, html) => {
   renderNewInspoSheet(_sheet, html);
 });
 
