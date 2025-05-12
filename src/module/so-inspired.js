@@ -4,7 +4,6 @@ import {
   updatePlayerList,
 } from "./socket";
 
-Hooks.on("renderChatMessage", () => {});
 Hooks.on("init", () => {
   loadTemplates([
     "modules/so-inspired/templates/colorPicker.hbs",
@@ -154,9 +153,15 @@ class ColorPickerSubmenu extends FormApplication {
 Hooks.on("ready", () => {
   createInspoFlag();
 
-  const soInspiredStyleSheet = Object.values(document.styleSheets).find((s) =>
-    s.href.split("/").find((i) => i.includes("so-inspired.css"))
+  const styles = Object.values(document.styleSheets).find((s) =>
+    Object.values(s.cssRules).find(
+      (c) => c.href === "modules/so-inspired/styles/so-inspired.css"
+    )
   );
+  const soInspiredStyleSheet = Object.values(styles.cssRules).find(
+    (c) => c.href === "modules/so-inspired/styles/so-inspired.css"
+  ).styleSheet;
+
   const color1 = game.settings.get(
     "so-inspired",
     "inspirationBackgroundColor"
@@ -167,7 +172,7 @@ Hooks.on("ready", () => {
   ).colorpicker2;
 
   soInspiredStyleSheet.insertRule(
-    `.meter.hit-dice.progress.preview::before {
+    `.meter.hit-dice.progress::before {
           background: 
             linear-gradient(
             to right,
@@ -177,23 +182,17 @@ Hooks.on("ready", () => {
           border-right: none !important;`,
     0
   );
-  soInspiredStyleSheet.insertRule(
-    `.meter.hit-dice.progress.inspiration::before {
-          background: 
-            linear-gradient(
-            to right,
-            ${color1} 0%,
-            ${color2} 100%
-          ) !important;
-          border-right: none !important;`,
-    1
-  );
 });
 
 Hooks.on("changeInspirationColor", () => {
-  const soInspiredStyleSheet = Object.values(document.styleSheets).find((s) =>
-    s.href.split("/").find((i) => i.includes("so-inspired.css"))
+  const styles = Object.values(document.styleSheets).find((s) =>
+    Object.values(s.cssRules).find(
+      (c) => c.href === "modules/so-inspired/styles/so-inspired.css"
+    )
   );
+  const soInspiredStyleSheet = Object.values(styles.cssRules).find(
+    (c) => c.href === "modules/so-inspired/styles/so-inspired.css"
+  ).styleSheet;
 
   for (const key of Object.keys(soInspiredStyleSheet.cssRules)) {
     if (
@@ -226,7 +225,7 @@ Hooks.on("changeInspirationColor", () => {
   );
 });
 
-Hooks.on("renderActorSheet", (_sheet, html) => {
+Hooks.on("renderActorSheetV2", (_sheet, html) => {
   renderNewInspoSheet(_sheet, html);
 });
 
@@ -234,8 +233,7 @@ Hooks.on("updateUser", (user) => {
   updateSheetForInspo(user);
 });
 
-Hooks.on("renderPlayerList", () => {
-  console.log("rendered");
+Hooks.on("renderPlayers", () => {
   if (game.settings.get("so-inspired", "showInspirationOnPlayerList"))
     updatePlayerListInspo();
 });
@@ -314,10 +312,7 @@ Hooks.on("tidy5e-sheet.renderActorSheet", (app, element) => {
 });
 
 async function updatePlayerListInspo() {
-  const playerList = $(document)
-    .find("aside#players.app")
-    .find("ol")
-    .find("li");
+  const playerList = $(document).find("aside#players").find("ol").find("li");
   for (const player of playerList) {
     const user = await fromUuid(`User.${$(player).attr("data-user-id")}`);
     if (!user.isGM) {
@@ -330,7 +325,7 @@ async function updatePlayerListInspo() {
       $(player)
         .children()
         .last()
-        .append(`<span class="inspiration-count">${inspoCount}</span>`);
+        .append(`<span class="inspiration-count"> - ${inspoCount}</span>`);
     }
   }
 }
