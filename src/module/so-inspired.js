@@ -184,6 +184,57 @@ Hooks.on("ready", () => {
   );
 });
 
+Hooks.on("getChatMessageContextOptions", (element, items) => {
+  const inspirationName = game.settings.get("so-inspired", "inspirationName");
+  items.push({
+    name: "Reroll Using " + inspirationName,
+    callback: (html) => {
+      rerollDice(html);
+    },
+    condition: (html) => {
+      const message = game.messages.get(html.dataset.messageId);
+      if (
+        (message.author.isSelf || game.user.isGM) &&
+        message.rolls.find((roll) => roll.validD20Roll === true)
+      )
+        return true;
+      return false;
+    },
+    icon: `<i class="fa fa-repeat" aria-hidden="true"></i>`,
+  });
+});
+
+async function rerollDice(html) {
+  const message = game.messages.get(html.dataset.messageId);
+
+  const actorUuid = "Actor." + message.speaker.actor;
+  const sheet = (await fromUuid(actorUuid)).sheet;
+  const user = game.users.find((u) => u.character?.uuid === actorUuid);
+
+  await removeInspiration(user, sheet).then(
+    async () => {
+      const roll = message.rolls[0];
+      const reroll = await roll.reroll();
+      const flavor = !message.flags["so-inspired"]?.isReroll
+        ? message.flavor +
+          ` (Reroll using ${game.settings.get(
+            "so-inspired",
+            "inspirationName"
+          )})`
+        : message.flavor;
+
+      const flags = { ...message.flags, "so-inspired.isReroll": true };
+
+      await reroll.toMessage({
+        flags: flags,
+        speaker: message.speaker,
+        flavor: flavor,
+      });
+    },
+    () => {}
+  );
+}
+
 Hooks.on("changeInspirationColor", () => {
   const styles = Object.values(document.styleSheets).find((s) =>
     Object.values(s.cssRules).find(
@@ -388,8 +439,10 @@ function renderNewInspoSheet(_sheet, html) {
         .find(".remove-inspiration-btn")
         .off("click")
         .on("click", async function () {
-          await removeInspiration(actorOwner, _sheet);
-          ui.players.render();
+          await removeInspiration(actorOwner, _sheet).then(
+            () => ui.players.render(),
+            () => {}
+          );
         });
     }
   }
@@ -437,7 +490,7 @@ async function addInspiration(user, _sheet) {
         )}!`,
     });
   }
-  if (_sheet) _sheet.render(true);
+  if (_sheet && _sheet.rendered) _sheet.render(true);
   updatePlayerList();
 }
 
@@ -450,6 +503,7 @@ async function removeInspiration(user, _sheet) {
   const currentInspo = game.settings.get("so-inspired", "useSharedInspiration")
     ? game.settings.get("so-inspired", "sharedInspiration")
     : user.getFlag("so-inspired", "inspirationCount");
+
   if (currentInspo > minInspo) {
     game.settings.get("so-inspired", "useSharedInspiration")
       ? await removeSharedInspiration()
@@ -462,9 +516,28 @@ async function removeInspiration(user, _sheet) {
           : _sheet.actor.name) +
         ` has used ${game.settings.get("so-inspired", "inspirationName")}!`,
     });
+    if (_sheet.rendered) {
+      _sheet.render(true);
+    }
+    updatePlayerList();
+    return Promise.resolve();
+  } else {
+    ChatMessage.create({
+      user: user,
+      flavor:
+        (game.settings.get("so-inspired", "useSharedInspiration")
+          ? "The group "
+          : _sheet
+          ? _sheet.actor.name
+          : user.name) +
+        ` attempted to use ${game.settings.get(
+          "so-inspired",
+          "inspirationName"
+        )}, but doesn't have any!`,
+    });
+
+    return Promise.reject();
   }
-  _sheet.render(true);
-  updatePlayerList();
 }
 
 function updateSheetForInspo(user) {
