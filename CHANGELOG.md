@@ -11,3 +11,7 @@
 ### Fixed
 
 - Fix SASS deprecation warnings.
+
+### Security
+
+- Fix NPM package vulnerabilities
