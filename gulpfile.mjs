@@ -11,24 +11,24 @@ import buffer from "vinyl-buffer";
 import source from "vinyl-source-stream";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
 
 import rollupStream from "@rollup/stream";
 
 import rollupConfig from "./rollup.config.mjs";
-import gulpSass from "gulp-sass";
-import dartSass from "sass";
 
 /********************/
 /*  CONFIGURATION   */
 /********************/
 
+const sass = require("gulp-sass")(require("sass"));
 const packageId = "so-inspired";
 const sourceDirectory = "./src";
 const distDirectory = "./dist";
 const stylesDirectory = `${sourceDirectory}/styles`;
 const stylesExtension = "scss";
 const sourceFileExtension = "js";
-const sass = gulpSass(dartSass);
 const staticFiles = ["module.json", "templates"];
 
 /********************/
