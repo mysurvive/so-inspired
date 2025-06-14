@@ -292,7 +292,7 @@ Hooks.on("changeInspirationColor", () => {
 });
 
 Hooks.on("renderActorSheetV2", (_sheet, html) => {
-  if (_sheet.id.split("-")[0]) {
+  if (_sheet.id.split("-")[0] === "Tidy5eCharacterSheet") {
     renderTidySheet(_sheet, html);
   } else renderNewInspoSheet(_sheet, html);
 });
