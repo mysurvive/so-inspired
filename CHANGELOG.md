@@ -12,7 +12,8 @@
 ### Fixed
 
 - Fix SASS deprecation warnings.
+- Fix Tidy 5e rendering.
 
 ### Security
 
-- Fix NPM package vulnerabilities
+- Fix NPM package vulnerabilities.
