@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-06-14
+
 ### Added
 
 - Add context menu for chat messages to allow rerolls for valid d20 rolls from the chat pane.
