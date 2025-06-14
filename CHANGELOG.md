@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.1.1] - 2025-06-14
+
+### Fixed
+
+- Removed accidental debug hook being enabled.
+
 ## [1.1.0] - 2025-06-14
 
 ### Added

@@ -8,7 +8,6 @@ import { SIMessageHandler } from "./messageHandler";
 import { MESSAGE_CONSTANTS } from "./messageConstants";
 
 Hooks.on("init", () => {
-  CONFIG.debug.hooks = true;
   loadTemplates([
     "modules/so-inspired/templates/colorPicker.hbs",
     "modules/so-inspired/templates/inspirationHandler.hbs",
