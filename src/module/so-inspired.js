@@ -49,6 +49,15 @@ Hooks.on("init", () => {
     default: false,
   });
 
+  game.settings.register("so-inspired", "oneReroll", {
+    name: "Only One Reroll",
+    hint: "If enabled, only allows one reroll on a check.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
+  });
+
   game.settings.register("so-inspired", "sharedInspiration", {
     scope: "world",
     config: false,
@@ -199,11 +208,22 @@ Hooks.on("getChatMessageContextOptions", (element, items) => {
     },
     condition: (html) => {
       const message = game.messages.get(html.dataset.messageId);
+      const isRerollOrRerolled = message.flags["so-inspired"]?.isReroll
+        ? true
+        : message.flags["so-inspired"]?.rerolled
+        ? true
+        : false;
       if (
         (message.author.isSelf || game.user.isGM) &&
         message.rolls.find((roll) => roll.validD20Roll === true)
-      )
-        return true;
+      ) {
+        if (
+          (!isRerollOrRerolled &&
+            game.settings.get("so-inspired", "oneReroll")) ||
+          !game.settings.get("so-inspired", "oneReroll")
+        )
+          return true;
+      }
       return false;
     },
     icon: `<i class="fa fa-repeat" aria-hidden="true"></i>`,
@@ -234,6 +254,10 @@ async function rerollDice(html) {
         : message.flavor;
 
       const flags = { ...message.flags, "so-inspired.isReroll": true };
+      message.updateSource({
+        ...message.flags,
+        "flags.so-inspired.rerolled": true,
+      });
 
       await reroll.toMessage({
         flags: flags,
