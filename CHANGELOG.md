@@ -6,6 +6,7 @@
 
 - Add context menu for chat messages to allow rerolls for valid d20 rolls from the chat pane.
 - Add One Reroll setting (this only works for context menu rerolls).
+- Add settings for custom chat messages for No Inspiration/Remove Inspiration/Add Inspiration/Maximum Inspiration.
 - Add CHANGELOG.md.
 - Update Github Workflows.
 - Add message handler.
