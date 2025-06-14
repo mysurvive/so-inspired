@@ -8,6 +8,7 @@
 - Add CHANGELOG.md.
 - Update Github Workflows.
 - Add message handler.
+- Update 5e minimum versioning to 5.0.3 and verified on FVTT version 13.345.
 
 ### Fixed
 

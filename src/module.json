@@ -11,7 +11,7 @@
   ],
   "compatibility": {
     "minimum": "13",
-    "verified": "13.341",
+    "verified": "13.345",
     "maximum": "13"
   },
   "relationships": {
@@ -20,8 +20,8 @@
         "id": "dnd5e",
         "type": "system",
         "compatibility": {
-          "minimum": "2.3.0",
-          "verified": "3.3.1"
+          "minimum": "5.0.3",
+          "verified": "5.0.3"
         }
       }
     ],
