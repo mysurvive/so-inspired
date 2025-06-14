@@ -58,6 +58,42 @@ Hooks.on("init", () => {
     default: false,
   });
 
+  game.settings.register("so-inspired", "addInspirationMessage", {
+    name: "Add Inspiration Message",
+    hint: `Add a custom message when inspiration is added. Use the key $$NAME$$ for "The party," the character's name, or the player's name in that order and $$INSPIRATION_NAME$$ for the name of the inspiration resource. Example: "$$NAME$$ has gained $$INSPIRATION_NAME$$!"`,
+    scope: "world",
+    config: true,
+    type: String,
+    default: MESSAGE_CONSTANTS.ADD_INSPIRATION,
+  });
+
+  game.settings.register("so-inspired", "maxInspirationMessage", {
+    name: "Maximum Inspiration Message",
+    hint: `Add a custom message when inspiration is maxed and another is attempted to be added. Use the key $$NAME$$ for "The party," the character's name, or the player's name in that order and $$INSPIRATION_NAME$$ for the name of the inspiration resource. Example: "$$NAME$$ was granted $$INSPIRATION_NAME$$, but can't have any more. Don't forget to use your $$INSPIRATION_NAME$$!"`,
+    scope: "world",
+    config: true,
+    type: String,
+    default: MESSAGE_CONSTANTS.MAX_INSPIRATION,
+  });
+
+  game.settings.register("so-inspired", "removeInspirationMessage", {
+    name: "Remove Inspiration Message",
+    hint: `Add a custom message when inspiration is removed. Use the key $$NAME$$ for "The party," the character's name, or the player's name in that order and $$INSPIRATION_NAME$$ for the name of the inspiration resource. Example: "$$NAME$$ has used $$INSPIRATION_NAME$$!"`,
+    scope: "world",
+    config: true,
+    type: String,
+    default: MESSAGE_CONSTANTS.REMOVE_INSPIRATION,
+  });
+
+  game.settings.register("so-inspired", "noInspirationMessage", {
+    name: "No Inspiration Message",
+    hint: `Add a custom message when inspiration is removed and there is no remaining inspiration. Use the key $$NAME$$ for "The party," the character's name, or the player's name in that order and $$INSPIRATION_NAME$$ for the name of the inspiration resource. Example: "$$NAME$$ attempted to use $$INSPIRATION_NAME$$, but doesn't have any!"`,
+    scope: "world",
+    config: true,
+    type: String,
+    default: MESSAGE_CONSTANTS.NO_INSPIRATION,
+  });
+
   game.settings.register("so-inspired", "sharedInspiration", {
     scope: "world",
     config: false,
@@ -572,9 +608,13 @@ async function addInspiration(user, _sheet) {
       : await user.setFlag("so-inspired", "inspirationCount", currentInspo + 1);
     if (_sheet && _sheet.rendered) _sheet.render(true);
     updatePlayerList();
-    return Promise.resolve(MESSAGE_CONSTANTS.ADD_INSPIRATION);
+    return Promise.resolve(
+      game.settings.get("so-inspired", "addInspirationMessage")
+    );
   } else {
-    return Promise.reject(MESSAGE_CONSTANTS.MAX_INSPIRATION);
+    return Promise.reject(
+      game.settings.get("so-inspired", "maxInspirationMessage")
+    );
   }
 }
 
@@ -597,9 +637,13 @@ async function removeInspiration(user, _sheet) {
       _sheet.render(true);
     }
     updatePlayerList();
-    return Promise.resolve(MESSAGE_CONSTANTS.REMOVE_INSPIRATION);
+    return Promise.resolve(
+      game.settings.get("so-inspired", "removeInspirationMessage")
+    );
   } else {
-    return Promise.reject(MESSAGE_CONSTANTS.NO_INSPIRATION);
+    return Promise.reject(
+      game.settings.get("so-inspired", "noInspirationMessage")
+    );
   }
 }
 
