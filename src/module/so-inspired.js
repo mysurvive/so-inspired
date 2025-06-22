@@ -201,7 +201,12 @@ class ColorPickerSubmenu extends FormApplication {
 Hooks.on("ready", () => {
   createInspoFlag();
 
-  game.soInspired = { MessageHandler: new SIMessageHandler() };
+  game.soInspired = {
+    AddInspiration: addInspiration,
+    InspirationHandler: inspirationHandler,
+    RemoveInspiration: removeInspiration,
+    MessageHandler: new SIMessageHandler(),
+  };
 
   const styles = Object.values(document.styleSheets).find((s) =>
     Object.values(s.cssRules).find(
@@ -632,9 +637,7 @@ async function removeInspiration(user, _sheet) {
       ? await removeSharedInspiration()
       : await user.setFlag("so-inspired", "inspirationCount", currentInspo - 1);
 
-    if (_sheet.rendered) {
-      _sheet.render(true);
-    }
+    if (_sheet && _sheet.rendered) _sheet.render(true);
     updatePlayerList();
     return Promise.resolve(
       game.settings.get("so-inspired", "removeInspirationMessage")
