@@ -201,11 +201,11 @@ class ColorPickerSubmenu extends FormApplication {
 Hooks.on("ready", () => {
   createInspoFlag();
 
-  game.soInspired = { 
+  game.soInspired = {
     AddInspiration: addInspiration,
     InspirationHandler: inspirationHandler,
     RemoveInspiration: removeInspiration,
-    MessageHandler: new SIMessageHandler() 
+    MessageHandler: new SIMessageHandler(),
   };
 
   const styles = Object.values(document.styleSheets).find((s) =>
