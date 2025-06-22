@@ -681,7 +681,7 @@ async function inspirationHandler() {
       if (result === 'cancel')
           return;
 
-      if (result === null || result.value === null || result.value === '') {
+      if (result === null || result === '') {
         ui.notifications.error(`A user was not selected.`);
         return;
       }
