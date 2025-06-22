@@ -1,4 +1,4 @@
-<div class="form-group">
+<div>
   <div class="instructions">
     Select a player to give
     {{inspirationLabel}}
@@ -7,14 +7,14 @@
   {{#each users}}
     <div class="user-area">
       <label for="user-{{id}}">
-        <input type="radio" name="user" id="{{id}}" />
+        <input type="radio" name="user" id="{{id}}" value="{{id}}" />
         {{name}}
       </label>
     </div>
   {{/each}}
   <div class="user-area">
     <label for="all">
-      <input type="radio" name="user" id="all" />
+      <input type="radio" name="user" id="all" value="all" />
       All players
     </label>
   </div>
