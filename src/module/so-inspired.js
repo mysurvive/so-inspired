@@ -662,30 +662,37 @@ async function inspirationHandler() {
     inspirationLabel: game.settings.get("so-inspired", "inspirationName"),
   };
 
-  new Dialog({
-    title: "Inspiration Handler",
-    content: await renderTemplate(
+  new foundry.applications.api.DialogV2({
+    window: { title: "Inspiration!" },
+    content: await foundry.applications.handlebars.renderTemplate(
       "modules/so-inspired/templates/inspirationHandler.hbs",
       options
     ),
-    buttons: {
-      confirm: {
-        label: "Confirm",
-        callback: (html) => {
-          inspirationHandlerResponse(html);
-        },
-      },
-      cancel: {
-        label: "Cancel",
-        callback: () => {},
-      },
-    },
-  }).render(true);
+    buttons: [{
+      action: "confirm",
+      label: "Confirm",
+      default: true,
+      callback: (event, button, dialog) => button.form.elements.user.value
+    }, {
+      action: "cancel",
+      label: "Cancel"
+    }],
+    submit: async (result) => {
+      if (result === 'cancel')
+          return;
+
+      if (result === null || result.value === null || result.value === '') {
+        ui.notifications.error(`A user was not selected.`);
+        return;
+      }
+      
+      await inspirationHandlerResponse(result);
+    }
+  }).render({ force: true });
 }
 
-async function inspirationHandlerResponse(html) {
-  const userId = html.find('input[name="user"]:checked').attr("id");
-  if (userId === "all") {
+async function inspirationHandlerResponse(result) {
+  if (result === "all") {
     for (const user of game.users) {
       const speaker = {
         actor: user.character?.id,
@@ -711,28 +718,30 @@ async function inspirationHandlerResponse(html) {
         );
       }
     }
-  } else {
-    const user = game.users.get(userId);
-    const speaker = {
-      actor: user.character?.id,
-      alias: user.character?.name,
-      scene: game.scenes?.active.id,
-      token: user.character?.token,
-    };
-    addInspiration(user).then(
-      (resolveMessage) => {
-        game.soInspired.MessageHandler.toChat({
-          message: resolveMessage,
-          speaker: speaker,
-        });
-        ui.players.render();
-      },
-      (rejectMessage) => {
-        game.soInspired.MessageHandler.toChat({
-          message: rejectMessage,
-          speaker: speaker,
-        });
-      }
-    );
+    
+    return;
   }
+
+  const user = game.users.get(result);
+  const speaker = {
+    actor: user.character?.id,
+    alias: user.character?.name,
+    scene: game.scenes?.active.id,
+    token: user.character?.token,
+  };
+  addInspiration(user).then(
+    (resolveMessage) => {
+      game.soInspired.MessageHandler.toChat({
+        message: resolveMessage,
+        speaker: speaker,
+      });
+      ui.players.render();
+    },
+    (rejectMessage) => {
+      game.soInspired.MessageHandler.toChat({
+        message: rejectMessage,
+        speaker: speaker,
+      });
+    }
+  );
 }
