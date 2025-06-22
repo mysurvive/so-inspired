@@ -663,7 +663,7 @@ async function inspirationHandler() {
   };
 
   new foundry.applications.api.DialogV2({
-    window: { title: "Inspiration!" },
+    window: { title: "Inspiration Handler" },
     content: await foundry.applications.handlebars.renderTemplate(
       "modules/so-inspired/templates/inspirationHandler.hbs",
       options
