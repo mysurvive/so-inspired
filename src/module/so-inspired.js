@@ -203,7 +203,7 @@ Hooks.on("ready", () => {
 
   game.soInspired = { 
     AddInspiration: addInspiration,
-    Inspiration: inspirationHandler,
+    InspirationHandler: inspirationHandler,
     RemoveInspiration: removeInspiration,
     MessageHandler: new SIMessageHandler() 
   };
