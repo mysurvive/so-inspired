@@ -666,31 +666,33 @@ async function inspirationHandler() {
   };
 
   new foundry.applications.api.DialogV2({
-    window: { title: "Inspiration!" },
+    window: { title: "Inspiration Handler" },
     content: await foundry.applications.handlebars.renderTemplate(
       "modules/so-inspired/templates/inspirationHandler.hbs",
       options
     ),
-    buttons: [{
-      action: "confirm",
-      label: "Confirm",
-      default: true,
-      callback: (event, button, dialog) => button.form.elements.user.value
-    }, {
-      action: "cancel",
-      label: "Cancel"
-    }],
+    buttons: [
+      {
+        action: "confirm",
+        label: "Confirm",
+        default: true,
+        callback: (event, button) => button.form.elements.user.value,
+      },
+      {
+        action: "cancel",
+        label: "Cancel",
+      },
+    ],
     submit: async (result) => {
-      if (result === 'cancel')
-          return;
+      if (result === "cancel") return;
 
-      if (result === null || result === '') {
+      if (result === null || result === "") {
         ui.notifications.error(`A user was not selected.`);
         return;
       }
-      
+
       await inspirationHandlerResponse(result);
-    }
+    },
   }).render({ force: true });
 }
 
@@ -721,7 +723,7 @@ async function inspirationHandlerResponse(result) {
         );
       }
     }
-    
+
     return;
   }
 
