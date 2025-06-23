@@ -3,10 +3,10 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 export class ColorPickerSubmenu extends HandlebarsApplicationMixin(
   ApplicationV2
 ) {
-  constructor() {
+  /*constructor() {
     super();
     addEventListener("change", this.updatePicker, false);
-  }
+  }*/
 
   static DEFAULT_OPTIONS = {
     title: "Inspiration Color Picker",

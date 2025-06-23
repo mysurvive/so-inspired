@@ -5,7 +5,7 @@
 
 module.exports = {
   parserOptions: {
-    ecmaVersion: 2020,
+    ecmaVersion: 13,
     extraFileExtensions: [".cjs", ".mjs"],
     sourceType: "module",
   },
@@ -17,7 +17,6 @@ module.exports = {
 
   globals: {
     $: "readonly",
-    pf2e: "readonly",
     globalThis: "readonly",
     isEmpty: "readonly",
     libWrapper: "readonly",
