@@ -1,4 +1,4 @@
-<form autocomplete="off" onsubmit="event.preventDefault();">
+<div>
   <fieldset class="preview-fieldset">
     <legend>
       Preview
@@ -52,21 +52,15 @@
         type="color"
         id="colorpicker1"
         name="colorpicker1"
-        value="{{colorpicker1}}"
+        value="{{colors.colorpicker1}}"
       />
       <label for="colorpicker2">Color 2:</label>
       <input
         type="color"
         id="colorpicker2"
         name="colorpicker2"
-        value="{{colorpicker2}}"
+        value="{{colors.colorpicker2}}"
       />
     </div>
   </fieldset>
-  <footer class="sheet-footer buttons">
-    <button type="submit" name="submit">
-      <i class="far fa-save"></i>
-      Save
-    </button>
-  </footer>
-</form>
+</div>

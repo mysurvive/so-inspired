@@ -6,6 +6,7 @@ import {
 
 import { SIMessageHandler } from "./messageHandler";
 import { MESSAGE_CONSTANTS } from "./messageConstants";
+import { ColorPickerSubmenu } from "./menus/colorPicker";
 
 Hooks.on("init", () => {
   loadTemplates([
@@ -130,73 +131,6 @@ Hooks.on("init", () => {
     },
   });
 });
-
-class ColorPickerSubmenu extends FormApplication {
-  constructor() {
-    super();
-    addEventListener("change", this.updatePicker, false);
-  }
-
-  updatePicker(event) {
-    const soInspiredStyleSheet = Object.values(document.styleSheets).find((s) =>
-      s.href.split("/").find((i) => i.includes("so-inspired.css"))
-    );
-    const color1 = document.querySelector("input#colorpicker1").value;
-    const color2 = document.querySelector("input#colorpicker2").value;
-
-    if (
-      soInspiredStyleSheet.cssRules[0].selectorText ===
-      ".meter.hit-dice.progress.preview::before"
-    )
-      soInspiredStyleSheet.deleteRule(0);
-
-    if (event.target.id == "colorpicker1") {
-      soInspiredStyleSheet.insertRule(
-        `.meter.hit-dice.progress.preview::before {
-          background: 
-            linear-gradient(
-            to right,
-            ${event.target.value} 0%,
-            ${color2} 100%
-          ) !important;
-          border-right: none !important;`,
-        0
-      );
-    } else if (event.target.id == "colorpicker2") {
-      soInspiredStyleSheet.insertRule(
-        `.meter.hit-dice.progress.preview::before {
-          background: 
-            linear-gradient(
-            to right,
-            ${color1} 0%,
-            ${event.target.value} 100%
-          ) !important;
-          border-right: none !important;`,
-        0
-      );
-    }
-  }
-
-  static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
-      popOut: true,
-      template: "modules/so-inspired/templates/colorPicker.hbs",
-      classes: ["form", "so-inspired", "color-picker"],
-      id: "so-inspired-color-picker",
-      title: "Inspiration Color Picker",
-    });
-  }
-
-  getData() {
-    return game.settings.get("so-inspired", "inspirationBackgroundColor");
-  }
-
-  _updateObject(event, formData) {
-    const data = expandObject(formData);
-    game.settings.set("so-inspired", "inspirationBackgroundColor", data);
-    Hooks.callAll("changeInspirationColor");
-  }
-}
 
 Hooks.on("ready", () => {
   createInspoFlag();
