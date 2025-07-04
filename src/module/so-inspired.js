@@ -292,7 +292,7 @@ Hooks.on("changeInspirationColor", () => {
 Hooks.on("renderActorSheetV2", (_sheet, html) => {
   if (_sheet.id.split("-")[0] === "Tidy5eCharacterSheet") {
     renderTidySheet(_sheet, html);
-  } else if (_sheet.id.includes('Tidy')) {
+  } else if (_sheet.id.includes("Tidy")) {
     // New Tidy Character Sheet Inspiration Tracking is Handled via API
     return;
   } else renderNewInspoSheet(_sheet, html);
@@ -310,8 +310,8 @@ Hooks.on("renderPlayers", () => {
 Hooks.on("tidy5e-sheet.ready", (api) => {
   /** Overrides the new Tidy 5e Character Sheet's inspiration tracker */
   api.config.actorInspiration?.configureBankedInspiration({
-    /** 
-     * A callback for when an inspiration change has been requested. 
+    /**
+     * A callback for when an inspiration change has been requested.
      * The delta is -1 or 1.
      */
     change: async (app, actor, delta) => {
@@ -360,7 +360,7 @@ Hooks.on("tidy5e-sheet.ready", (api) => {
       }
     },
     /** Gets the value / max for the inspiration tracker */
-    getData: (app, actor) => {
+    getData: (app) => {
       let currentInspiration;
       const actorOwner = game.users.find(
         (u) => u.character?.uuid === app.actor.uuid
