@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-07-06
+
+### Added
+
+- Integrate Inspiration with Tidy 5e Sheets new character sheet
+
+### Changed
+
+- Update Inspiration Handler from Dialog to DialogV2 ( @thzero )
+- Add InspirationHandler, AddInspiration, and RemoveInspiration functions to the global API ( @thezero )
+
+### Fixed
+
+- Fix the Color Picker submenu preview and update to AppV2
+
 ## [1.1.1] - 2025-06-14
 
 ### Fixed
