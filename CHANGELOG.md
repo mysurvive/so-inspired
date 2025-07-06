@@ -6,7 +6,7 @@
 
 ### Added
 
-- Integrate Inspiration with Tidy 5e Sheets new character sheet
+- Integrate Inspiration with Tidy 5e Sheets new character sheet ( @kgar )
 
 ### Changed
 
