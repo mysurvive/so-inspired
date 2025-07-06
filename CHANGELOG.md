@@ -11,7 +11,7 @@
 ### Changed
 
 - Update Inspiration Handler from Dialog to DialogV2 ( @thzero )
-- Add InspirationHandler, AddInspiration, and RemoveInspiration functions to the global API ( @thezero )
+- Add InspirationHandler, AddInspiration, and RemoveInspiration functions to the global API ( @thzero )
 
 ### Fixed
 
