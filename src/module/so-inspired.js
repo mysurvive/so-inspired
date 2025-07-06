@@ -161,7 +161,7 @@ Hooks.on("ready", () => {
   ).colorpicker2;
 
   soInspiredStyleSheet.insertRule(
-    `.meter.hit-dice.progress::before {
+    `.meter.hit-dice.progress.preview::before {
           background: 
             linear-gradient(
             to right,

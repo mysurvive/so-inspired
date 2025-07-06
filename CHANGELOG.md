@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.2.1] - 2025-07-06
+
+### Fixed
+
+- Fixed a bug where Color Picker menu wasn't working correctly
+
 ## [1.2.0] - 2025-07-06
 
 ### Added
