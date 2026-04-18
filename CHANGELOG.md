@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-04-18
+
+### Changed
+
+- Foundry VTT v14 compatibility
+- DnD5e v5.3.0+ compatibility
+
+### Added
+
+- New setting to disallow players from adding inspiration themselves
+
 ## [1.2.1] - 2025-07-06
 
 ### Fixed

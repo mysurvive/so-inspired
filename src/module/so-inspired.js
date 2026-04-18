@@ -110,6 +110,15 @@ Hooks.on("init", () => {
     default: "Inspiration",
   });
 
+  game.settings.register("so-inspired", "disableAdd", {
+    name: "Disable Player Add Inspiration Button",
+    hint: "When true, disables the ability for players to add their own inspiration",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
+  });
+
   game.settings.registerMenu("so-inspired", "colorPickerMenu", {
     name: "Color Picker",
     label: "Open color menu",
@@ -144,20 +153,20 @@ Hooks.on("ready", () => {
 
   const styles = Object.values(document.styleSheets).find((s) =>
     Object.values(s.cssRules).find(
-      (c) => c.href === "modules/so-inspired/styles/so-inspired.css"
-    )
+      (c) => c.href === "modules/so-inspired/styles/so-inspired.css",
+    ),
   );
   const soInspiredStyleSheet = Object.values(styles.cssRules).find(
-    (c) => c.href === "modules/so-inspired/styles/so-inspired.css"
+    (c) => c.href === "modules/so-inspired/styles/so-inspired.css",
   ).styleSheet;
 
   const color1 = game.settings.get(
     "so-inspired",
-    "inspirationBackgroundColor"
+    "inspirationBackgroundColor",
   ).colorpicker1;
   const color2 = game.settings.get(
     "so-inspired",
-    "inspirationBackgroundColor"
+    "inspirationBackgroundColor",
   ).colorpicker2;
 
   soInspiredStyleSheet.insertRule(
@@ -169,7 +178,7 @@ Hooks.on("ready", () => {
             ${color2} 100%
           ) !important;
           border-right: none !important;`,
-    0
+    0,
   );
 });
 
@@ -223,7 +232,7 @@ async function rerollDice(html) {
         ? message.flavor +
           ` (Reroll using ${game.settings.get(
             "so-inspired",
-            "inspirationName"
+            "inspirationName",
           )})`
         : message.flavor;
 
@@ -244,18 +253,18 @@ async function rerollDice(html) {
         speaker: message.speaker,
         message: rejectMessage,
       });
-    }
+    },
   );
 }
 
 Hooks.on("changeInspirationColor", () => {
   const styles = Object.values(document.styleSheets).find((s) =>
     Object.values(s.cssRules).find(
-      (c) => c.href === "modules/so-inspired/styles/so-inspired.css"
-    )
+      (c) => c.href === "modules/so-inspired/styles/so-inspired.css",
+    ),
   );
   const soInspiredStyleSheet = Object.values(styles.cssRules).find(
-    (c) => c.href === "modules/so-inspired/styles/so-inspired.css"
+    (c) => c.href === "modules/so-inspired/styles/so-inspired.css",
   ).styleSheet;
 
   for (const key of Object.keys(soInspiredStyleSheet.cssRules)) {
@@ -269,11 +278,11 @@ Hooks.on("changeInspirationColor", () => {
 
   const color1 = game.settings.get(
     "so-inspired",
-    "inspirationBackgroundColor"
+    "inspirationBackgroundColor",
   ).colorpicker1;
   const color2 = game.settings.get(
     "so-inspired",
-    "inspirationBackgroundColor"
+    "inspirationBackgroundColor",
   ).colorpicker2;
 
   soInspiredStyleSheet.insertRule(
@@ -285,7 +294,7 @@ Hooks.on("changeInspirationColor", () => {
             ${color2} 100%
           ) !important;
           border-right: none !important;`,
-    1
+    1,
   );
 });
 
@@ -316,7 +325,7 @@ Hooks.on("tidy5e-sheet.ready", (api) => {
      */
     change: async (app, actor, delta) => {
       const actorOwner = game.users.find(
-        (u) => u.character?.uuid === app.actor.uuid
+        (u) => u.character?.uuid === app.actor.uuid,
       );
       const speaker = {
         actor: app.actor.id,
@@ -339,7 +348,7 @@ Hooks.on("tidy5e-sheet.ready", (api) => {
               message: rejectMessage,
               speaker: speaker,
             });
-          }
+          },
         );
       } else if (delta > 0) {
         await addInspiration(actorOwner, app).then(
@@ -355,7 +364,7 @@ Hooks.on("tidy5e-sheet.ready", (api) => {
               message: rejectMessage,
               speaker: speaker,
             });
-          }
+          },
         );
       }
     },
@@ -363,7 +372,7 @@ Hooks.on("tidy5e-sheet.ready", (api) => {
     getData: (app) => {
       let currentInspiration;
       const actorOwner = game.users.find(
-        (u) => u.character?.uuid === app.actor.uuid
+        (u) => u.character?.uuid === app.actor.uuid,
       );
 
       if (!actorOwner) {
@@ -375,7 +384,7 @@ Hooks.on("tidy5e-sheet.ready", (api) => {
 
       currentInspiration = game.settings.get(
         "so-inspired",
-        "useSharedInspiration"
+        "useSharedInspiration",
       )
         ? game.settings.get("so-inspired", "sharedInspiration")
         : actorOwner.getFlag("so-inspired", "inspirationCount");
@@ -400,12 +409,12 @@ function renderTidySheet(app, element) {
 
   let currentInspiration;
   const actorOwner = game.users.find(
-    (u) => u.character?.uuid === app.actor.uuid
+    (u) => u.character?.uuid === app.actor.uuid,
   );
   if (actorOwner || game.user.isGM) {
     currentInspiration = game.settings.get(
       "so-inspired",
-      "useSharedInspiration"
+      "useSharedInspiration",
     )
       ? game.settings.get("so-inspired", "sharedInspiration")
       : actorOwner.getFlag("so-inspired", "inspirationCount");
@@ -471,7 +480,7 @@ function renderTidySheet(app, element) {
               message: rejectMessage,
               speaker: speaker,
             });
-          }
+          },
         );
       });
     $(html)
@@ -491,7 +500,7 @@ function renderTidySheet(app, element) {
               message: rejectMessage,
               speaker: speaker,
             });
-          }
+          },
         );
       });
   }
@@ -504,7 +513,7 @@ async function updatePlayerListInspo() {
     if (!user.isGM) {
       const inspoCount = game.settings.get(
         "so-inspired",
-        "useSharedInspiration"
+        "useSharedInspiration",
       )
         ? game.settings.get("so-inspired", "sharedInspiration")
         : user.getFlag("so-inspired", "inspirationCount");
@@ -533,7 +542,7 @@ function renderNewInspoSheet(_sheet, html) {
       let maxInspiration;
       currentInspiration = game.settings.get(
         "so-inspired",
-        "useSharedInspiration"
+        "useSharedInspiration",
       )
         ? game.settings.get("so-inspired", "sharedInspiration")
         : actorOwner.getFlag("so-inspired", "inspirationCount");
@@ -544,21 +553,25 @@ function renderNewInspoSheet(_sheet, html) {
 
       let counterArea;
       let newInspirationArea;
+      const isDisabled =
+        game.settings.get("so-inspired", "disableAdd") == true
+          ? "disabled"
+          : "";
 
       if (_sheet.options.classes.includes("dnd5e2")) {
         counterArea = $(html).find(".card .stats").children().last();
         newInspirationArea = `<div class="meter-group"><div class="label roboto-condensed-upper"><span>${game.settings.get(
           "so-inspired",
-          "inspirationName"
+          "inspirationName",
         )}</span></div><div class="meter hit-dice progress inspiration" role="meter" aria-valuemin="0" aria-valuenow="${currentInspiration}" aria-valuemax="${maxInspiration}" style="--bar-percentage: ${
           (currentInspiration / maxInspiration) * 100
-        }%"><div class="label"><span class="value">${currentInspiration}</span><span class="separator"> / </span><span class="max">${maxInspiration}</span></div><div class="inspo-buttons"><button type="button" class="add-inspiration-btn"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn"><i class="fa-solid fa-minus" style="color: #000000;"></i></button></div></div></div>`;
+        }%"><div class="label"><span class="value">${currentInspiration}</span><span class="separator"> / </span><span class="max">${maxInspiration}</span></div><div class="inspo-buttons"><button type="button" class="add-inspiration-btn" ${isDisabled}><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn"><i class="fa-solid fa-minus" style="color: #000000;"></i></button></div></div></div>`;
         counterArea.after(newInspirationArea);
       } else {
         counterArea = $(html).find(".counters");
         newInspirationArea = `<div class="counter flexrow new-inspiration"><h4>${game.settings.get(
           "so-inspired",
-          "inspirationName"
+          "inspirationName",
         )}</h4><div class="counter-value"><button type="button" class="add-inspiration-btn"><i class="fa-solid fa-plus" style="color: #000000;"></i></button><button type="button" class="remove-inspiration-btn"><i class="fa-solid fa-minus" style="color: #000000;"></i></button><span class="inspiration-span">${currentInspiration}</span></div></div>`;
         counterArea.append(newInspirationArea);
       }
@@ -587,7 +600,7 @@ function renderNewInspoSheet(_sheet, html) {
                 message: rejectMessage,
                 speaker: speaker,
               });
-            }
+            },
           );
         });
       $(html)
@@ -607,7 +620,7 @@ function renderNewInspoSheet(_sheet, html) {
                 message: rejectMessage,
                 speaker: speaker,
               });
-            }
+            },
           );
         });
     }
@@ -631,11 +644,11 @@ async function addInspiration(user, _sheet) {
     if (_sheet && _sheet.rendered) _sheet.render(true);
     updatePlayerList();
     return Promise.resolve(
-      game.settings.get("so-inspired", "addInspirationMessage")
+      game.settings.get("so-inspired", "addInspirationMessage"),
     );
   } else {
     return Promise.reject(
-      game.settings.get("so-inspired", "maxInspirationMessage")
+      game.settings.get("so-inspired", "maxInspirationMessage"),
     );
   }
 }
@@ -658,11 +671,11 @@ async function removeInspiration(user, _sheet) {
     if (_sheet && _sheet.rendered) _sheet.render(true);
     updatePlayerList();
     return Promise.resolve(
-      game.settings.get("so-inspired", "removeInspirationMessage")
+      game.settings.get("so-inspired", "removeInspirationMessage"),
     );
   } else {
     return Promise.reject(
-      game.settings.get("so-inspired", "noInspirationMessage")
+      game.settings.get("so-inspired", "noInspirationMessage"),
     );
   }
 }
@@ -687,7 +700,7 @@ async function inspirationHandler() {
     window: { title: "Inspiration Handler" },
     content: await foundry.applications.handlebars.renderTemplate(
       "modules/so-inspired/templates/inspirationHandler.hbs",
-      options
+      options,
     ),
     buttons: [
       {
@@ -737,7 +750,7 @@ async function inspirationHandlerResponse(result) {
               message: rejectMessage,
               speaker: speaker,
             });
-          }
+          },
         );
       }
     }
@@ -765,6 +778,6 @@ async function inspirationHandlerResponse(result) {
         message: rejectMessage,
         speaker: speaker,
       });
-    }
+    },
   );
 }
